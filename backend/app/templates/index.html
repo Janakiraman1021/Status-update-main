@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WorkLog Backend &bull; System Operational</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #07090e;
+      --card-bg: rgba(15, 23, 42, 0.65);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover-border: rgba(99, 102, 241, 0.4);
+      --primary: #6366f1;
+      --primary-glow: rgba(99, 102, 241, 0.35);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.4);
+      --cyan: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+      padding: 1.5rem;
+    }
+
+    /* Cosmic Gradient Background Orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.45;
+      pointer-events: none;
+      animation: float 14s ease-in-out infinite alternate;
+    }
+
+    .orb-1 {
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, #4f46e5 0%, rgba(99, 102, 241, 0) 70%);
+      top: -100px;
+      left: -80px;
+      animation-duration: 16s;
+    }
+
+    .orb-2 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, #059669 0%, rgba(16, 185, 129, 0) 70%);
+      bottom: -150px;
+      right: -100px;
+      animation-duration: 20s;
+      animation-delay: -5s;
+    }
+
+    .orb-3 {
+      width: 380px;
+      height: 380px;
+      background: radial-gradient(circle, #0284c7 0%, rgba(6, 182, 212, 0) 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.25;
+      animation-duration: 18s;
+      animation-delay: -9s;
+    }
+
+    /* Subtle Animated Grid Overlay */
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 40%, transparent 100%);
+      pointer-events: none;
+    }
+
+    /* Main Container Card */
+    .hero-card {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 680px;
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 3rem 2.75rem;
+      box-shadow: 
+        0 20px 50px -15px rgba(0, 0, 0, 0.7),
+        0 0 80px -20px var(--primary-glow);
+      transition: border-color 0.4s ease, transform 0.4s ease;
+      animation: cardEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .hero-card:hover {
+      border-color: var(--card-hover-border);
+      box-shadow: 
+        0 25px 60px -15px rgba(0, 0, 0, 0.8),
+        0 0 100px -20px rgba(99, 102, 241, 0.45);
+    }
+
+    /* Status Pill / Live Badge */
+    .status-badge-wrapper {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.45rem 1rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 9999px;
+      margin-bottom: 2rem;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+    }
+
+    .pulse-dot-container {
+      position: relative;
+      width: 10px;
+      height: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--emerald);
+    }
+
+    .pulse-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background-color: var(--emerald);
+      opacity: 0.7;
+      animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+
+    .status-badge-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #34d399;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* Heading & Animated Shimmer Gradient */
+    .title {
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #ffffff 10%, #c7d2fe 45%, #818cf8 80%, #34d399 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientShimmer 6s ease-in-out infinite alternate;
+    }
+
+    .description {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 2.25rem;
+      font-weight: 400;
+    }
+
+    .description strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Live Heartbeat Visualizer Bar */
+    .wave-container {
+      background: rgba(2, 6, 23, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 2.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .wave-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .wave-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .wave-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      color: #38bdf8;
+      font-weight: 500;
+    }
+
+    .wave-graphic {
+      width: 140px;
+      height: 32px;
+    }
+
+    .wave-graphic polyline {
+      fill: none;
+      stroke: #34d399;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      animation: waveDash 2.5s ease-in-out infinite;
+    }
+
+    /* Metric Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 2.25rem;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 1rem 0.9rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+      background: rgba(255, 255, 255, 0.045);
+      border-color: rgba(99, 102, 241, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+
+    .metric-val {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+    }
+
+    /* Actions & Interactive Tester */
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      color: #ffffff;
+      border: none;
+      padding: 0.85rem 1.6rem;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+      box-shadow: 0 6px 25px rgba(99, 102, 241, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      padding: 0.85rem 1.4rem;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Live Ping Result Banner */
+    .ping-toast {
+      margin-top: 1.5rem;
+      padding: 0.85rem 1.15rem;
+      border-radius: 12px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: #6ee7b7;
+      display: none;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    /* Animations */
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, 40px) scale(1.08); }
+      100% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+
+    @keyframes cardEntrance {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes gradientShimmer {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    @keyframes ping {
+      75%, 100% {
+        transform: scale(2.6);
+        opacity: 0;
+      }
+    }
+
+    @keyframes waveDash {
+      0% {
+        stroke-dashoffset: 200;
+      }
+      50% {
+        stroke-dashoffset: 0;
+      }
+      100% {
+        stroke-dashoffset: -200;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .hero-card {
+        padding: 2rem 1.5rem;
+        border-radius: 20px;
+      }
+      .title {
+        font-size: 1.95rem;
+      }
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+      .wave-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .wave-graphic {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="grid-overlay"></div>
+
+  <main class="hero-card" id="main-card">
+    <div class="status-badge-wrapper">
+      <div class="pulse-dot-container">
+        <div class="pulse-ring"></div>
+        <div class="pulse-dot"></div>
+      </div>
+      <span class="status-badge-text">Backend Active &bull; 200 OK</span>
+    </div>
+
+    <h1 class="title">
+      <span class="gradient-text">Backend is Running</span><br>
+      for WorkLog
+    </h1>
+
+    <p class="description">
+      The Flask REST API engine is online and ready. Serving employee daily status updates, automated EOD digests, and real-time database sync for <strong>WorkLog</strong>.
+    </p>
+
+    <div class="wave-container">
+      <div class="wave-info">
+        <span class="wave-title">Health Stream Monitor</span>
+        <span class="wave-value" id="live-clock">--:--:-- UTC</span>
+      </div>
+      <svg class="wave-graphic" viewBox="0 0 140 32">
+        <polyline points="0,16 25,16 35,4 45,28 55,10 65,22 75,16 140,16" />
+      </svg>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Engine</div>
+        <div class="metric-val">Flask WSGI</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Platform</div>
+        <div class="metric-val">Serverless / Vercel</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Status</div>
+        <div class="metric-val" style="color: #34d399;">Operational</div>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn-primary" id="test-ping-btn" onclick="testPing()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        Ping /api/health
+      </button>
+
+      <a href="/api/health" class="btn-secondary" target="_blank" rel="noopener">
+        <span>Raw JSON</span>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+      </a>
+    </div>
+
+    <div id="ping-toast" class="ping-toast"></div>
+  </main>
+
+  <script>
+    // Live ticking clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('live-clock').textContent = now.toTimeString().split(' ')[0] + ' Local';
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Interactive Ping Test
+    async function testPing() {
+      const btn = document.getElementById('test-ping-btn');
+      const toast = document.getElementById('ping-toast');
+      const originalText = btn.innerHTML;
+      
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+      btn.innerHTML = 'Testing latency...';
+
+      const start = performance.now();
+      try {
+        const res = await fetch('/api/health');
+        const duration = Math.round(performance.now() - start);
+        const data = await res.json();
+        
+        toast.style.display = 'block';
+        toast.innerHTML = `&check; [${res.status} OK] Response received in ${duration}ms &bull; ${JSON.stringify(data.data || data)}`;
+      } catch (err) {
+        toast.style.display = 'block';
+        toast.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        toast.style.color = '#fca5a5';
+        toast.innerHTML = `&#9888; Request reached backend &bull; ${err.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.innerHTML = originalText;
+      }
+    }
+  </script>
+</body>
+</html>
