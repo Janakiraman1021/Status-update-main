@@ -1,0 +1,23 @@
+# Secrets — never commit real environment files
+.env
+.env.*
+!.env.example
+
+# Python
+backend/venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Development email outbox (.eml files)
+backend/outbox/
+
+# Node / Next.js (see frontend/.gitignore for more)
+node_modules/
+frontend/.next/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
