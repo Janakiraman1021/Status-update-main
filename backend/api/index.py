@@ -1,4 +1,5 @@
 import sys
+import urllib.parse
 from pathlib import Path
 
 # Add backend directory to sys.path so app and run can be imported reliably
@@ -10,24 +11,33 @@ from run import app
 
 
 class VercelPathMiddleware:
-    """Ensure PATH_INFO correctly reflects the requested route when deployed on Vercel."""
+    """Ensure PATH_INFO reflects the actual requested path on Vercel."""
 
     def __init__(self, wsgi_app):
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
-        path = environ.get("PATH_INFO", "")
-        # If Vercel rewrote the path to /api/index or /api/index.py, resolve to original request path
-        if path in ("/api/index", "/api/index.py"):
-            matched = (
-                environ.get("HTTP_X_MATCHED_PATH")
+        qs = environ.get("QUERY_STRING", "")
+        if "__path__=" in qs:
+            params = urllib.parse.parse_qs(qs)
+            if "__path__" in params and params["__path__"]:
+                raw_path = params["__path__"][0]
+                clean_path = "/" + raw_path.lstrip("/")
+                environ["PATH_INFO"] = clean_path
+                params.pop("__path__", None)
+                environ["QUERY_STRING"] = urllib.parse.urlencode(params, doseq=True)
+        else:
+            candidate = (
+                environ.get("HTTP_X_FORWARDED_URI")
+                or environ.get("HTTP_X_MATCHED_PATH")
+                or environ.get("REQUEST_URI")
                 or environ.get("RAW_URI")
-                or environ.get("HTTP_X_NOW_ROUTE_MATCHES")
             )
-            if matched and not matched.startswith("/api/index"):
-                environ["PATH_INFO"] = matched.split("?")[0]
-            else:
-                environ["PATH_INFO"] = "/"
+            if candidate:
+                clean = candidate.split("?")[0]
+                if clean and not clean.startswith("/api/index"):
+                    environ["PATH_INFO"] = clean
+
         return self.wsgi_app(environ, start_response)
 
 

@@ -8,11 +8,6 @@ bp = Blueprint("root", __name__)
 
 
 @bp.get("/")
-@bp.get("/api")
-@bp.get("/api/")
-@bp.get("/api/index")
-@bp.get("/api/index.py")
-@bp.get("/index.py")
 def root():
     # If explicitly requested JSON or API client header without text/html
     accept = request.headers.get("Accept", "")
@@ -31,3 +26,12 @@ def root():
             "service": "WorkLog API",
             "status": "running",
         })
+
+
+@bp.get("/api")
+def api_root():
+    return ok({
+        "message": "Backend is running for WorkLog",
+        "service": "WorkLog API",
+        "status": "running",
+    })
