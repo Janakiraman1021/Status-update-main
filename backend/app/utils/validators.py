@@ -82,6 +82,12 @@ def _oid(value: Optional[str]) -> Optional[str]:
     return value
 
 
+def _required_oid(value: str) -> str:
+    if not ObjectId.is_valid(value):
+        raise ValueError("Invalid identifier")
+    return value
+
+
 def _hhmm(value: Optional[str]) -> Optional[str]:
     if value in (None, ""):
         return None
@@ -172,6 +178,18 @@ class ProjectUpdate(Schema):
     name: Optional[ProjectName] = None
     description: Annotated[Optional[str], Field(default=None, max_length=2000), AfterValidator(_clean_or_none)] = None
     status: Optional[Literal["Active", "Archived"]] = None
+
+
+ProjectProgress = Literal["On track", "Needs help", "Delayed", "Done"]
+
+
+class ProjectStatusUpsert(Schema):
+    project_id: Annotated[str, AfterValidator(_required_oid)]
+    work_date: RequiredDate
+    status: ProjectProgress = "On track"
+    daily_update: Annotated[str, Field(max_length=MAX_TEXT), AfterValidator(_required_text)]
+    next_step: Text = None
+    help_needed: Text = None
 
 
 # ---- blockers / dependencies -------------------------------------------

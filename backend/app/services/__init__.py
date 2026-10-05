@@ -16,6 +16,7 @@ from .eod_renderer import EmailTheme
 from .eod_service import EodService
 from .history_service import HistoryService
 from .project_service import ProjectService
+from .project_status_service import ProjectStatusService
 from .scheduler_service import SchedulerService
 from .settings_service import SettingsService
 from .tracking_service import TrackingService
@@ -37,6 +38,7 @@ class Services:
     auth: AuthService
     settings: SettingsService
     projects: ProjectService
+    project_statuses: ProjectStatusService
     work_logs: WorkLogService
     tracking: TrackingService
     dashboard: DashboardService
@@ -51,6 +53,7 @@ def build_services(db, config, runtime: Runtime) -> Services:
     repos = Repositories.from_db(db)
     settings = SettingsService(repos, config)
     projects = ProjectService(repos)
+    project_statuses = ProjectStatusService(repos, projects)
     work_logs = WorkLogService(repos, projects, settings)
     email = EmailService(runtime.email_provider, repos.email_logs)
     eod = EodService(repos, runtime.ai, email, settings, work_logs, EmailTheme.from_settings(config))
@@ -59,6 +62,7 @@ def build_services(db, config, runtime: Runtime) -> Services:
         auth=AuthService(repos, config, runtime.limiter),
         settings=settings,
         projects=projects,
+        project_statuses=project_statuses,
         work_logs=work_logs,
         tracking=TrackingService(repos, projects, settings),
         dashboard=DashboardService(repos, settings, work_logs),

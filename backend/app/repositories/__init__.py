@@ -7,6 +7,7 @@ from pymongo.database import Database
 from .email_repository import EmailLogRepository
 from .eod_repository import EodRepository, EodVersionRepository
 from .project_repository import ProjectRepository
+from .project_status_repository import ProjectStatusRepository
 from .settings_repository import JobLockRepository, SettingsRepository
 from .tracking_repository import BlockerRepository, DependencyRepository
 from .user_repository import SessionRepository, UserRepository
@@ -18,6 +19,7 @@ class Repositories:
     users: UserRepository
     sessions: SessionRepository
     projects: ProjectRepository
+    project_statuses: ProjectStatusRepository
     work_logs: WorkLogRepository
     work_items: WorkItemRepository
     blockers: BlockerRepository
@@ -34,6 +36,7 @@ class Repositories:
             users=UserRepository(db),
             sessions=SessionRepository(db),
             projects=ProjectRepository(db),
+            project_statuses=ProjectStatusRepository(db),
             work_logs=WorkLogRepository(db),
             work_items=WorkItemRepository(db),
             blockers=BlockerRepository(db),

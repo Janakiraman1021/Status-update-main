@@ -44,6 +44,11 @@ def ensure_indexes(db: Database) -> None:
     db.projects.create_index([("user_id", ASCENDING), ("name_lower", ASCENDING)], unique=True, name="uniq_user_project_name")
 
     db.work_logs.create_index([("user_id", ASCENDING), ("work_date", ASCENDING)], unique=True, name="uniq_user_date")
+    db.project_statuses.create_index(
+        [("user_id", ASCENDING), ("project_id", ASCENDING), ("work_date", ASCENDING)],
+        unique=True,
+        name="uniq_user_project_status_date",
+    )
 
     db.work_items.create_index([("user_id", ASCENDING), ("work_date", ASCENDING), ("timestamp", ASCENDING)], name="user_date_ts")
     db.work_items.create_index([("user_id", ASCENDING), ("project_id", ASCENDING), ("work_date", DESCENDING)], name="user_project_date")

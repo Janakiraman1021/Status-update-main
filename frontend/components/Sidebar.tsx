@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  CalendarDays, FileText, FolderKanban, History, LayoutDashboard, LogOut, NotebookPen, Settings, X,
+  CalendarDays, FileText, FolderKanban, History, LayoutDashboard, LogOut, NotebookPen, Settings, ChartNoAxesCombined, X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,6 +17,7 @@ export const NAV_SECTIONS = [
       { href: "/dashboard", label: "Dashboard", short: "Home", Icon: LayoutDashboard },
       { href: "/calendar", label: "Calendar", short: "Calendar", Icon: CalendarDays },
       { href: "/work-log", label: "Work Log", short: "Work Log", Icon: NotebookPen },
+      { href: "/project-status", label: "Project Status", short: "Status", Icon: ChartNoAxesCombined },
     ],
   },
   {

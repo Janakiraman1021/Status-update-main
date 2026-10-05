@@ -46,30 +46,32 @@ export const EMPTY_WORK_FILTERS: WorkFilters = { q: "", from: "", to: "", projec
 
 export function WorkHistoryFilters({ filters, onChange, projects }: { filters: WorkFilters; onChange: (f: WorkFilters) => void; projects: Project[] }) {
   return (
-    <div className="grid gap-2 border-b border-line p-3 sm:grid-cols-2 lg:grid-cols-6">
-      <div className="relative sm:col-span-2">
+    <div className="grid min-w-0 grid-cols-1 gap-2 border-b border-line p-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+      <div className="relative min-w-0 sm:col-span-2">
         <label htmlFor="history-search" className="sr-only">Search work history</label>
         <Search aria-hidden className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-subtle" />
-        <Input id="history-search" type="search" value={filters.q} onChange={(e) => onChange({ ...filters, q: e.target.value })} placeholder="Search work, projects, blockers…" className="pl-8" />
+        <Input id="history-search" type="search" value={filters.q} onChange={(e) => onChange({ ...filters, q: e.target.value })} placeholder="Search work, projects, blockers…" className="min-w-0 pl-8" />
       </div>
-      <div>
+      <div className="min-w-0">
         <label htmlFor="history-from" className="sr-only">From date</label>
-        <Input id="history-from" type="date" value={filters.from} onChange={(e) => onChange({ ...filters, from: e.target.value })} aria-label="From date" />
+        <Input id="history-from" type="date" value={filters.from} onChange={(e) => onChange({ ...filters, from: e.target.value })} aria-label="From date" className="min-w-0" />
       </div>
-      <div>
+      <div className="min-w-0">
         <label htmlFor="history-to" className="sr-only">To date</label>
-        <Input id="history-to" type="date" value={filters.to} onChange={(e) => onChange({ ...filters, to: e.target.value })} aria-label="To date" />
+        <Input id="history-to" type="date" value={filters.to} onChange={(e) => onChange({ ...filters, to: e.target.value })} aria-label="To date" className="min-w-0" />
       </div>
-      <Select aria-label="Project" value={filters.project_id} onChange={(e) => onChange({ ...filters, project_id: e.target.value })}>
-        <option value="">All projects</option>
-        {projects.map((p) => <option key={p.id} value={p.id}>{p.name}{p.status === "Archived" ? " (archived)" : ""}</option>)}
-      </Select>
-      <div className="grid grid-cols-2 gap-2">
-        <Select aria-label="Category" value={filters.category} onChange={(e) => onChange({ ...filters, category: e.target.value })}>
+      <div className="min-w-0">
+        <Select aria-label="Project" value={filters.project_id} onChange={(e) => onChange({ ...filters, project_id: e.target.value })} className="min-w-0">
+          <option value="">All projects</option>
+          {projects.map((p) => <option key={p.id} value={p.id}>{p.name}{p.status === "Archived" ? " (archived)" : ""}</option>)}
+        </Select>
+      </div>
+      <div className="grid min-w-0 grid-cols-1 gap-2 sm:col-span-2 sm:grid-cols-2 lg:col-span-2 2xl:col-span-1">
+        <Select aria-label="Category" value={filters.category} onChange={(e) => onChange({ ...filters, category: e.target.value })} className="min-w-0">
           <option value="">Any category</option>
           {WORK_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
         </Select>
-        <Select aria-label="Status" value={filters.status} onChange={(e) => onChange({ ...filters, status: e.target.value })}>
+        <Select aria-label="Status" value={filters.status} onChange={(e) => onChange({ ...filters, status: e.target.value })} className="min-w-0">
           <option value="">Any status</option>
           {WORK_STATUSES.map((s) => <option key={s}>{s}</option>)}
         </Select>
