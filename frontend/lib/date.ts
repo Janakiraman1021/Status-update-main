@@ -52,6 +52,12 @@ export function weekdayName(iso: string): string {
   return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("en-GB", { weekday: "long", timeZone: "UTC" });
 }
 
+export function isHoliday(iso: string): boolean {
+  const { year, month, day } = parts(iso);
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  return weekday === 0 || (weekday === 6 && Math.ceil(day / 7) % 2 === 0);
+}
+
 export function monthLabel(year: number, month: number): string {
   return `${MONTHS[month - 1]} ${year}`;
 }

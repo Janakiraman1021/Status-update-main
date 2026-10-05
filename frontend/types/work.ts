@@ -91,6 +91,7 @@ export interface DayView {
 
 export interface CalendarDay {
   date: string;
+  is_holiday: boolean;
   has_work: boolean;
   eod_status: EodStatusValue;
   eod_generated: boolean;

@@ -27,18 +27,46 @@ def test_calendar_reports_work_and_eod_state(api, mail):
     api.post("/api/work-logs", {"work_date": "2026-10-07", "quick_notes": "notes only"})
     api.post("/api/blockers", {"description": "Waiting", "identified_date": "2026-10-07"})
     eod_id = data(api.post("/api/eod/generate", {"work_date": "2026-10-03"}))["report"]["id"]
+    eod_view = data(api.get(f"/api/eod/{eod_id}"))
+    assert eod_view["source_inputs"]["entries"][0]["description"] == "Removed selector"
     api.post(f"/api/eod/{eod_id}/send")
 
     cal = data(api.get("/api/calendar?year=2026&month=10"))
     assert len(cal["days"]) == 31
     by_date = {d["date"]: d for d in cal["days"]}
-    assert by_date["2026-10-03"] == {"date": "2026-10-03", "has_work": True, "eod_status": "SENT", "eod_generated": True,
+    assert by_date["2026-10-03"] == {"date": "2026-10-03", "is_holiday": False, "has_work": True, "eod_status": "SENT", "eod_generated": True,
                                      "eod_sent": True, "eod_failed": False, "has_blocker": False}
     assert by_date["2026-10-07"]["has_work"] is True and by_date["2026-10-07"]["has_blocker"] is True
     assert by_date["2026-10-07"]["eod_generated"] is False
+    assert data(api.get("/api/eod/2026-10-07"))["source_inputs"]["quick_notes"] == "notes only"
     assert by_date["2026-10-10"]["has_work"] is False
     assert api.get("/api/calendar?year=2026&month=13").status_code == 400
     assert api.get("/api/calendar?year=abc&month=1").status_code == 400
+
+
+def test_calendar_marks_sundays_and_second_fourth_saturdays_as_holidays(api):
+    for year, month in ((2026, 10), (2026, 11), (2027, 2)):
+        calendar = data(api.get(f"/api/calendar?year={year}&month={month}"))
+        expected_holidays = {
+            day["date"] for day in calendar["days"]
+            if datetime.fromisoformat(day["date"]).weekday() == 6
+            or (
+                datetime.fromisoformat(day["date"]).weekday() == 5
+                and (datetime.fromisoformat(day["date"]).day - 1) // 7 + 1 in (2, 4)
+            )
+        }
+        holiday_dates = {day["date"] for day in calendar["days"] if day["is_holiday"]}
+        assert holiday_dates == expected_holidays
+
+    october = data(api.get("/api/calendar?year=2026&month=10"))
+    october_holidays = {day["date"] for day in october["days"] if day["is_holiday"]}
+    assert {"2026-10-11", "2026-10-25", "2026-10-10", "2026-10-24"} <= october_holidays
+    november = data(api.get("/api/calendar?year=2026&month=11"))
+    november_holidays = {day["date"] for day in november["days"] if day["is_holiday"]}
+    assert {"2026-11-14", "2026-11-28"} <= november_holidays
+    february = data(api.get("/api/calendar?year=2027&month=2"))
+    february_holidays = {day["date"] for day in february["days"] if day["is_holiday"]}
+    assert {"2027-02-14", "2027-02-28", "2027-02-13", "2027-02-27"} <= february_holidays
 
 
 def test_dashboard_uses_real_data(api, today):

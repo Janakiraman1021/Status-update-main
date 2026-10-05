@@ -92,8 +92,12 @@ class DashboardService:
             iso = current.isoformat()
             eod = eods.get(iso)
             status = eod["status"] if eod else EodStatus.NOT_GENERATED
+            is_holiday = current.weekday() == 6 or (
+                current.weekday() == 5 and (current.day - 1) // 7 + 1 in (2, 4)
+            )
             days.append({
                 "date": iso,
+                "is_holiday": is_holiday,
                 "has_work": iso in work_dates,
                 "eod_status": status,
                 "eod_generated": bool(eod and eod.get("current_version", 0) >= 1) or status in (EodStatus.GENERATED, EodStatus.SENT),

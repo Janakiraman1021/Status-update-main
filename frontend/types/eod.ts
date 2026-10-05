@@ -89,10 +89,22 @@ export interface EodDelivery {
   reference: { version?: number };
 }
 
+export interface EodSourceInputs {
+  quick_notes?: string;
+  next_steps?: string;
+  learnings?: string;
+  meetings?: string;
+  metrics?: string;
+  entries?: { time?: string; description: string; project?: string | null; category?: string | null; status?: string | null }[];
+  blockers?: { description: string; status: string; dependency?: string | null; expected_resolution?: string | null }[];
+  dependencies?: { description: string; type: string; owner?: string | null; status: string }[];
+}
+
 export interface EodView {
   work_date: string;
   date_label: string;
   has_work: boolean;
+  source_inputs: EodSourceInputs;
   default_recipients: Recipients;
   default_options: EodOptions;
   ai_provider: string;

@@ -23,13 +23,13 @@ function EntryFields({ draft, setDraft, projects, idPrefix, autoFocus }: {
   draft: EntryDraft; setDraft: (d: EntryDraft) => void; projects: Project[]; idPrefix: string; autoFocus?: boolean;
 }) {
   return (
-    <div className="grid gap-2 sm:grid-cols-[6.5rem_1fr]">
-      <div>
+    <div className="grid min-w-0 gap-2 sm:grid-cols-[6.5rem_minmax(0,1fr)]">
+      <div className="min-w-0">
         <label htmlFor={`${idPrefix}-time`} className="sr-only">Time</label>
         <Input id={`${idPrefix}-time`} type="time" value={draft.time} onChange={(e) => setDraft({ ...draft, time: e.target.value })} aria-describedby={`${idPrefix}-time-hint`} />
         <span id={`${idPrefix}-time-hint`} className="sr-only">Optional. Defaults to the current time.</span>
       </div>
-      <div>
+      <div className="min-w-0">
         <label htmlFor={`${idPrefix}-desc`} className="sr-only">What did you do?</label>
         <Input
           id={`${idPrefix}-desc`}
@@ -40,24 +40,24 @@ function EntryFields({ draft, setDraft, projects, idPrefix, autoFocus }: {
           onChange={(e) => setDraft({ ...draft, description: e.target.value })}
         />
       </div>
-      <div className="grid grid-cols-1 gap-2 sm:col-span-2 sm:grid-cols-3">
-        <div>
-          <label htmlFor={`${idPrefix}-cat`} className="sr-only">Category</label>
+      <div className="grid min-w-0 grid-cols-1 gap-2 sm:col-span-2 sm:grid-cols-2 2xl:grid-cols-3">
+        <div className="min-w-0">
+          <label htmlFor={`${idPrefix}-cat`} className="mb-1 block text-xs text-muted">Category</label>
           <Select id={`${idPrefix}-cat`} value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value as WorkCategory | "" })}>
-            <option value="">Category (optional)</option>
+            <option value="">Choose category</option>
             {WORK_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
           </Select>
         </div>
-        <div>
-          <label htmlFor={`${idPrefix}-status`} className="sr-only">Status</label>
+        <div className="min-w-0">
+          <label htmlFor={`${idPrefix}-status`} className="mb-1 block text-xs text-muted">Status</label>
           <Select id={`${idPrefix}-status`} value={draft.status} onChange={(e) => setDraft({ ...draft, status: e.target.value as WorkStatus | "" })}>
-            <option value="">Status (optional)</option>
+            <option value="">Choose status</option>
             {WORK_STATUSES.map((s) => <option key={s}>{s}</option>)}
           </Select>
         </div>
-        <div>
-          <label htmlFor={`${idPrefix}-project`} className="sr-only">Project</label>
-          <ProjectSelector id={`${idPrefix}-project`} projects={projects} value={draft.project_id} onChange={(project_id) => setDraft({ ...draft, project_id })} placeholder="Project (day default)" />
+        <div className="min-w-0">
+          <label htmlFor={`${idPrefix}-project`} className="mb-1 block text-xs text-muted">Project</label>
+          <ProjectSelector id={`${idPrefix}-project`} projects={projects} value={draft.project_id} onChange={(project_id) => setDraft({ ...draft, project_id })} placeholder="Day default" />
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@
 import { AlertCircle, CheckCircle2, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { WEEKDAYS, addDays, formatLong, monthGrid, monthLabel, parts } from "@/lib/date";
+import { WEEKDAYS, addDays, formatLong, isHoliday, monthGrid, monthLabel, parts } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import type { CalendarDay } from "@/types/work";
 import { Button } from "./ui";
@@ -23,6 +23,7 @@ interface CalendarProps {
 function describe(date: string, info: CalendarDay | undefined, today: string): string {
   const bits = [formatLong(date)];
   if (date === today) bits.push("today");
+  if (info?.is_holiday ?? isHoliday(date)) bits.push("holiday");
   if (info?.has_work) bits.push("work logged");
   if (info?.eod_sent) bits.push("EOD sent");
   else if (info?.eod_failed) bits.push("EOD failed");
@@ -103,6 +104,7 @@ export default function Calendar({ year, month, today, days, selected, onSelect,
               if (!date) return <div role="gridcell" key={`empty-${row}-${col}`} className="min-h-16 border-r border-line bg-surface-2/50 last:border-r-0 sm:min-h-24" />;
               const info = byDate.get(date);
               const isToday = date === today;
+              const holiday = info?.is_holiday ?? isHoliday(date);
               const isSelected = date === selected;
               const isFuture = date > today;
               return (
@@ -111,25 +113,30 @@ export default function Calendar({ year, month, today, days, selected, onSelect,
                     type="button"
                     data-date={date}
                     tabIndex={date === focused ? 0 : -1}
-                    onClick={() => onSelect(date)}
+                    onClick={() => {
+                      if (!holiday) onSelect(date);
+                    }}
                     onKeyDown={(e) => onKeyDown(e, date)}
                     onFocus={() => setFocused(date)}
                     aria-label={describe(date, info, today)}
+                    aria-disabled={holiday}
                     aria-current={isToday ? "date" : undefined}
                     className={cn(
                       "group flex h-full min-h-16 w-full flex-col items-start gap-1 p-1.5 text-left transition-colors hover:bg-surface-hover focus-visible:z-10 sm:min-h-24 sm:p-2",
+                      holiday && "bg-danger-soft",
                       isSelected && "bg-primary-soft",
                     )}
                   >
                     <span
                       className={cn(
                         "flex h-6 min-w-6 items-center justify-center rounded-full px-1 text-[13px] tabular-nums",
-                        isToday ? "bg-primary font-semibold text-primary-text" : isFuture ? "text-subtle" : "text-text",
+                        isToday ? "bg-primary font-semibold text-primary-text" : holiday ? "text-danger" : isFuture ? "text-subtle" : "text-text",
                       )}
                     >
                       {parts(date).day}
                     </span>
                     <span className="flex flex-wrap items-center gap-1" aria-hidden>
+                      {holiday && <span className="rounded bg-surface px-1 text-[10px] font-medium text-danger">Holiday</span>}
                       {info?.has_work && <span className="h-2 w-2 rounded-full bg-primary" title="Work logged" />}
                       {info?.eod_sent ? (
                         <CheckCircle2 className="h-3.5 w-3.5 text-success" />
@@ -154,6 +161,7 @@ export default function Calendar({ year, month, today, days, selected, onSelect,
       </div>
 
       <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted" aria-label="Legend">
+        <li className="flex items-center gap-1.5"><span className="rounded bg-danger-soft px-1 text-[10px] font-medium text-danger" aria-hidden>H</span> Holiday (Sunday and 2nd/4th Saturday)</li>
         <li className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-primary" aria-hidden /> Work logged</li>
         <li className="flex items-center gap-1.5"><FileText aria-hidden className="h-3.5 w-3.5 text-primary" /> EOD generated</li>
         <li className="flex items-center gap-1.5"><CheckCircle2 aria-hidden className="h-3.5 w-3.5 text-success" /> EOD sent</li>

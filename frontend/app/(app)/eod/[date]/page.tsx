@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import EmptyState from "@/components/EmptyState";
 import EodEditor, { type RecipientsText } from "@/components/EodEditor";
 import EodOptionsPicker, { EodStyleBar } from "@/components/EodOptionsPicker";
+import EodSourceInputs from "@/components/EodSourceInputs";
 import EodStatus from "@/components/EodStatus";
 import ErrorState from "@/components/ErrorState";
 import LoadingState from "@/components/LoadingState";
@@ -289,6 +290,8 @@ function EodWorkspace({ view, setData, reload }: { view: EodView; setData: (v: E
           </ul>
         </Alert>
       )}
+
+      <EodSourceInputs inputs={view.source_inputs} />
 
       {!report?.current_version ? (
         <Card>

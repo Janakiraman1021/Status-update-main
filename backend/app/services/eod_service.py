@@ -293,11 +293,13 @@ class EodService:
 
         settings = self.settings.get(user_id)
         tz = settings["timezone"]
+        source_inputs, _, _ = self.build_context(user, work_date)
         default_recipients = self.settings.resolve_recipients(user)
         result: dict[str, Any] = {
             "work_date": work_date,
             "date_label": format_long(work_date),
             "has_work": self.work_logs.has_work(user_id, work_date),
+            "source_inputs": source_inputs,
             "default_recipients": default_recipients,
             "default_options": {"length": settings["eod_length"], "tone": settings["eod_tone"]},
             "ai_provider": self.ai.name,

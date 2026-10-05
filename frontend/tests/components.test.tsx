@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import Calendar from "@/components/Calendar";
 import EodEditor from "@/components/EodEditor";
+import EodSourceInputs from "@/components/EodSourceInputs";
 import EodStatus from "@/components/EodStatus";
 import { EodHistoryTable } from "@/components/HistoryTables";
 import { EntryComposer } from "@/components/WorkEntry";
@@ -80,8 +81,8 @@ describe("Login", () => {
 
 describe("Calendar", () => {
   const days: CalendarDay[] = [
-    { date: "2026-10-03", has_work: true, eod_status: "SENT", eod_generated: true, eod_sent: true, eod_failed: false, has_blocker: false },
-    { date: "2026-10-02", has_work: true, eod_status: "GENERATED", eod_generated: true, eod_sent: false, eod_failed: false, has_blocker: true },
+    { date: "2026-10-03", is_holiday: false, has_work: true, eod_status: "SENT", eod_generated: true, eod_sent: true, eod_failed: false, has_blocker: false },
+    { date: "2026-10-02", is_holiday: false, has_work: true, eod_status: "GENERATED", eod_generated: true, eod_sent: false, eod_failed: false, has_blocker: true },
   ];
 
   it("labels days with their state and supports keyboard navigation", async () => {
@@ -106,6 +107,40 @@ describe("Calendar", () => {
     expect(onMonthChange).toHaveBeenCalledWith(2026, 11);
     await user.click(screen.getByRole("button", { name: "Previous month" }));
     expect(onMonthChange).toHaveBeenCalledWith(2026, 9);
+  });
+
+  it("marks Sundays and second/fourth Saturdays as holidays and prevents selecting them", async () => {
+    const onSelect = vi.fn();
+    const user = userEvent.setup();
+    renderWithProviders(
+      <Calendar year={2026} month={10} today="2026-10-03" days={[]} onSelect={onSelect} onMonthChange={vi.fn()} onToday={vi.fn()} />,
+    );
+
+    for (const date of ["04", "10", "11", "24", "25"]) {
+      const sunday = screen.getByRole("button", { name: `${date} October 2026, holiday` });
+      expect(sunday).toHaveAttribute("aria-disabled", "true");
+      expect(sunday).toHaveClass("bg-danger-soft");
+      await user.click(sunday);
+    }
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(screen.getByRole("list", { name: "Legend" })).toHaveTextContent("Holiday (Sunday and 2nd/4th Saturday)");
+  });
+});
+
+describe("EOD source inputs", () => {
+  it("lets the user view the notes and entries recorded for the report", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <EodSourceInputs inputs={{ quick_notes: "Typed notes", next_steps: "Send the update", entries: [{ description: "Updated dashboard", category: "Development" }] }} />,
+    );
+
+    const disclosure = screen.getByText("View the inputs you recorded for this day");
+    expect(screen.queryByText("Typed notes")).not.toBeVisible();
+    await user.click(disclosure);
+    expect(screen.getByText("Typed notes")).toBeVisible();
+    expect(screen.getByText("Send the update")).toBeVisible();
+    expect(screen.getByText("Updated dashboard")).toBeVisible();
+    expect(screen.getByText("(Development)")).toBeVisible();
   });
 });
 

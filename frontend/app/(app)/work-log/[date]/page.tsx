@@ -25,7 +25,7 @@ import type { DayView, WorkEntry as Entry, WorkLog } from "@/types/work";
 
 function SummaryItem({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div>
+    <div className="min-w-0">
       <dt className="text-xs text-muted">{label}</dt>
       <dd className="text-[15px] font-semibold tabular-nums text-text">{value}</dd>
     </div>
@@ -138,12 +138,12 @@ export default function WorkLogDayPage() {
             {date !== today && <Button size="sm" onClick={() => goTo(today)}>Today</Button>}
           </div>
         </div>
-        <div className="grid gap-4 px-4 py-3 md:grid-cols-[minmax(0,18rem)_1fr_auto] md:items-center">
-          <div>
+        <div className="grid gap-4 px-4 py-3 md:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] md:items-center 2xl:grid-cols-[minmax(0,18rem)_minmax(0,1fr)_auto]">
+          <div className="min-w-0">
             <label htmlFor="day-project" className="mb-1 block text-xs text-muted">Project</label>
             <ProjectSelector id="day-project" projects={projects ?? []} value={day.project_id} onChange={changeProject} disabled={savingProject} />
           </div>
-          <dl className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+          <dl className="grid min-w-0 grid-cols-2 gap-3 min-[480px]:grid-cols-3 2xl:grid-cols-5">
             <SummaryItem label="Completed" value={day.summary.completed} />
             <SummaryItem label="In progress" value={day.summary.in_progress} />
             <SummaryItem label="Blockers" value={day.summary.blockers} />
@@ -153,7 +153,7 @@ export default function WorkLogDayPage() {
               <dd className="mt-0.5"><EodStatus status={day.eod.status} /></dd>
             </div>
           </dl>
-          <div className="flex gap-2 md:justify-end">
+          <div className="flex min-w-0 gap-2 md:col-span-2 md:justify-end 2xl:col-span-1">
             {hasEod ? (
               <Link href={`/eod/${date}`} className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line-strong bg-surface px-3.5 text-sm font-medium text-text shadow-sm hover:bg-surface-hover">
                 <FileText aria-hidden className="h-4 w-4" /> Open EOD
